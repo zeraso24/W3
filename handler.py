@@ -534,6 +534,34 @@ def handler(job):
     Returns:
         dict: A dictionary containing either an error message or a success status with generated images.
     """
+    # ---------------------------------------------------------------------------
+    # Diagnostic output for network volume debugging (runs on every request)
+    # ---------------------------------------------------------------------------
+    print("--- worker-comfyui: Network Volume Diagnostics ---")
+    extra_model_paths_file = "/comfyui/extra_model_paths.yaml"
+    if os.path.isfile(extra_model_paths_file):
+        print(f"extra_model_paths.yaml: FOUND at {extra_model_paths_file}")
+        with open(extra_model_paths_file, "r") as f:
+            print(f"extra_model_paths.yaml content:\n{f.read()}")
+    else:
+        print(f"extra_model_paths.yaml: NOT FOUND at {extra_model_paths_file}")
+
+    runpod_volume = "/runpod-volume"
+    if os.path.isdir(runpod_volume):
+        print(f"Network volume: MOUNTED at {runpod_volume}")
+        try:
+            contents = os.listdir(runpod_volume)
+            print(f"{runpod_volume} contents: {contents}")
+            models_dir = os.path.join(runpod_volume, "models")
+            if os.path.isdir(models_dir):
+                models_contents = os.listdir(models_dir)
+                print(f"{models_dir} contents: {models_contents}")
+        except Exception as e:
+            print(f"Error listing {runpod_volume}: {e}")
+    else:
+        print(f"Network volume: NOT MOUNTED at {runpod_volume}")
+    print("--- End Diagnostics ---")
+
     job_input = job["input"]
     job_id = job["id"]
 
